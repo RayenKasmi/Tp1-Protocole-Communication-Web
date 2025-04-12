@@ -1,7 +1,18 @@
 import { Type } from 'class-transformer';
-import { IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, MaxLength, ValidateNested } from 'class-validator';
-import { User } from '../../user/entities/user.entity';
-import { Skill } from '../../skill/entities/skill.entity';
+import { IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, MaxLength, ValidateNested, IsArray } from 'class-validator';
+
+// New DTOs for handling relationships by ID or full object
+class UserIdDto {
+  @IsNumber()
+  @IsNotEmpty()
+  id: number;
+}
+
+class SkillIdDto {
+  @IsNumber()
+  @IsOptional()
+  id?: number;
+}
 
 export class CreateCvDto {
   @IsNotEmpty()
@@ -33,13 +44,14 @@ export class CreateCvDto {
   @IsString()
   path: string;
 
-  @IsOptional()
+  @IsNotEmpty()
   @ValidateNested()
-  @Type(() => User)
-  user?: User;
+  @Type(() => UserIdDto)
+  user: UserIdDto;
 
   @IsOptional()
+  @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => Skill)
-  skills?: Skill[];
+  @Type(() => SkillIdDto)
+  skills?: SkillIdDto[];
 }

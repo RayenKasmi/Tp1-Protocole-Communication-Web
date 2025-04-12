@@ -5,19 +5,31 @@ import { UserModule } from './user/user.module';
 import { CvModule } from './cv/cv.module';
 import { SkillModule } from './skill/skill.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 
 @Module({
-  imports: [UserModule, CvModule, SkillModule,
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DB_HOST,
-      port: process.env.DB_PORT ? parseInt(process.env.DB_PORT, 10) : undefined,
-      username: process.env.DB_USERNAME,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      entities: [__dirname + '/**/*.entity{.ts,.js}'],
-      synchronize: true,
-    })
+  imports: [
+    ConfigModule.forRoot({
+      isGlobal: true,
+      // No envFilePath needed since we're using Docker env vars
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        type: 'mysql',
+        host: configService.get('DB_HOST'),
+        port: configService.get<number>('DB_PORT', { infer: true }),
+        username: configService.get('DB_USERNAME'),
+        password: configService.get('DB_PASSWORD'),
+        database: configService.get('DB_NAME'),
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        synchronize: true, 
+      }),
+    }),
+    UserModule,
+    CvModule,
+    SkillModule,
   ],
   controllers: [AppController],
   providers: [AppService],

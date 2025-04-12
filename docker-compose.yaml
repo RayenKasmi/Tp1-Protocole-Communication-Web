@@ -1,0 +1,50 @@
+version: '3'
+
+services:
+  mysql-tp1-web:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: tp1-web
+      MYSQL_USER: user
+      MYSQL_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_tp1_web_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", "-uroot", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  nest-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - DB_HOST=mysql-tp1-web
+      - DB_PORT=3306
+      - DB_USERNAME=user
+      - DB_PASSWORD=password
+      - DB_NAME=tp1-web
+      - PORT=3000
+    depends_on:
+      mysql-tp1-web:
+        condition: service_healthy
+    networks:
+      - app-network
+    # enables hot reloading without rebuilding the container
+    volumes:
+      - ./src:/app/src
+
+volumes:
+  mysql_tp1_web_data:
+
+networks:
+  app-network:
+    driver: bridge

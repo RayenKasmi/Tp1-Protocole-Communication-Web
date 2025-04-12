@@ -3,7 +3,7 @@ import { Cv } from '../../cv/entities/cv.entity';
 
 @Entity()
 export class User {
-    @PrimaryGeneratedColumn("uuid")
+    @PrimaryGeneratedColumn()
     id: number;
 
     @Column({ unique: true, length: 20 })
