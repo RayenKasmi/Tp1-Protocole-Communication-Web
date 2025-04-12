@@ -10,15 +10,13 @@ export class GenericRepository<T extends ObjectLiteral> {
         return this.repo.find();
     }
 
-    async findById(id: any): Promise<T> {
+    async findOne(id: any): Promise<T> {
         const result = await this.repo.findOne({ where: { id } as any });
     
         if (!result) {
         throw new NotFoundException(`Entity with ID ${id} not found`);
         }
-    
         return result;
-        
       }
       
 
@@ -30,25 +28,31 @@ export class GenericRepository<T extends ObjectLiteral> {
           });
       
           if (!entity) {
-            throw new Error(`Update failed: Entity with ID ${id} not found`);
+            throw new NotFoundException(`Update failed: Entity with ID ${id} not found`);
           }
       
           return await this.repo.save(entity);
         } catch (error) {
-          throw new Error(`Update failed: ${error.message}`);
+            if (error instanceof NotFoundException) {
+                throw error; 
+            }
+            throw new Error(`Update failed: ${error.message}`);
         }
       }
       
 
-    async delete(id: any): Promise<void> {
+    async remove(id: any): Promise<void> {
     try {
         const result = await this.repo.delete(id);  //could use softDelete instead or later on
     
         if (result.affected === 0) { //entity not found
-            throw new Error(`Entity with ID ${id} not found`);
+            throw new NotFoundException(`Entity with ID ${id} not found`);
         }
     
     } catch (error) {
+        if (error instanceof NotFoundException) {
+            throw error; 
+        }
         throw new Error(`Delete failed: ${error.message}`);
     }
     }
