@@ -41,6 +41,8 @@ services:
     # enables hot reloading without rebuilding the container
     volumes:
       - ./src:/app/src
+      - ./package.json:/app/package.json
+
 
 volumes:
   mysql_tp1_web_data:
