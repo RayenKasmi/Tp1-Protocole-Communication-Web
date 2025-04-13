@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   mysql-tp1-web:
     image: mysql:8.0
