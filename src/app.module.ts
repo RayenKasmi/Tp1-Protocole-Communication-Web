@@ -6,6 +6,7 @@ import { CvModule } from './cv/cv.module';
 import { SkillModule } from './skill/skill.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UploadsModule } from './uploads/uploads.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
     UserModule,
     CvModule,
     SkillModule,
+    UploadsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

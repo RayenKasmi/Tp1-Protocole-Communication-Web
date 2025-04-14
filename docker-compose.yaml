@@ -40,6 +40,7 @@ services:
     volumes:
       - ./src:/app/src
       - ./package.json:/app/package.json
+      - ./public:/app/public
 
 
 volumes:
