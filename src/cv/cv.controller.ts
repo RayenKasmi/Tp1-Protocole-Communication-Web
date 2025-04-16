@@ -11,20 +11,11 @@ export class CvController {
 
   @Post()
   @UseInterceptors(
-    FormDataParserInterceptor, 
     FileInterceptor('file')
   )
   async create(
     @Body() createCvDto: CreateCvDto,
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 1000000 }), 
-          new FileTypeValidator({ fileType: /^image\/(jpeg|png|jpg)$/ }),
-        ],
-        fileIsRequired: false,
-      }),
-    )
+    @UploadedFile()
     file?: Express.Multer.File,
   ) {
     if (file) {
@@ -32,7 +23,7 @@ export class CvController {
     } else {
       createCvDto.path = '/default/no-image.png';
     }
-    
+
     return this.cvService.create(createCvDto);
   }
 
@@ -52,23 +43,15 @@ export class CvController {
     FileInterceptor('image')
   )
   async update(
-    @Param('id') id: string, 
+    @Param('id') id: string,
     @Body() updateCvDto: UpdateCvDto,
-    @UploadedFile(
-      new ParseFilePipe({
-        validators: [
-          new MaxFileSizeValidator({ maxSize: 1000000 }),
-          new FileTypeValidator({ fileType: /^image\/(jpeg|png|jpg)$/ }),
-        ],
-        fileIsRequired: false,
-      }),
-    )
+    @UploadedFile()
     file?: Express.Multer.File,
   ) {
     if (file) {
       updateCvDto.path = `/uploads/${file.filename}`;
     }
-    
+
     return this.cvService.update(+id, updateCvDto);
   }
 

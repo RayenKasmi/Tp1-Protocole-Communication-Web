@@ -6,7 +6,7 @@ import { CvModule } from './cv/cv.module';
 import { SkillModule } from './skill/skill.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { UploadsModule } from './uploads/uploads.module';
+import { SharedModule } from './shared/shared.module';
 
 @Module({
   imports: [
@@ -31,7 +31,7 @@ import { UploadsModule } from './uploads/uploads.module';
     UserModule,
     CvModule,
     SkillModule,
-    UploadsModule,
+    SharedModule,
   ],
   controllers: [AppController],
   providers: [AppService],
