@@ -1,7 +1,7 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateCvDto } from './dto/create-cv.dto';
 import { UpdateCvDto } from './dto/update-cv.dto';
-import { GenericRepository } from '../shared/repositories/generic.repository';
+import { GenericCrudService } from '../common/services/generic.crud.service';
 import { Cv } from './entities/cv.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -10,7 +10,7 @@ import { SkillService } from '../skill/skill.service';
 import { Skill } from '../skill/entities/skill.entity';
 
 @Injectable()
-export class CvService extends GenericRepository<Cv> {
+export class CvService extends GenericCrudService<Cv> {
   constructor(
     @InjectRepository(Cv) private readonly cvRepository: Repository<Cv>,
     private readonly userService: UserService,

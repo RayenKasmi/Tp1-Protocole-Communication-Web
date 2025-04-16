@@ -5,7 +5,7 @@ import {
 } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { extname } from 'path';
-import { UuidService } from '../services/uuid.service';
+import { UuidService } from './uuid.service';
 
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/jpg', 'image/png'];
 const UPLOAD_DIR = 'public/uploads/';

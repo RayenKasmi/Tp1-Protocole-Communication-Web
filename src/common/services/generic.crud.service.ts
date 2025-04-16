@@ -3,7 +3,7 @@ import { Repository, DeepPartial, ObjectLiteral } from 'typeorm';
 
 // A generic base service class that provides basic CRUD operations
 
-export class GenericRepository<T extends ObjectLiteral> {
+export class GenericCrudService<T extends ObjectLiteral> {
     constructor(private readonly repo: Repository<T>) {}
   
     findAll(): Promise<T[]> {

@@ -6,7 +6,7 @@ import { CvModule } from './cv/cv.module';
 import { SkillModule } from './skill/skill.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { SharedModule } from './shared/shared.module';
+import { SharedModule } from './common/shared.module';
 
 @Module({
   imports: [
