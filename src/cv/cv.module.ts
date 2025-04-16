@@ -5,11 +5,19 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { Cv } from './entities/cv.entity';
 import { UserModule } from '../user/user.module';
 import { SkillModule } from '../skill/skill.module';
+import { SharedModule } from '../common/shared.module';
+import { MulterModule } from '@nestjs/platform-express';
+import { ImageUploadConfigService } from '../common/services/image-upload-config.service';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Cv]),
-  UserModule,
-  SkillModule
+  imports: [
+    TypeOrmModule.forFeature([Cv]),
+    UserModule,
+    SkillModule,
+    MulterModule.registerAsync({
+      imports: [SharedModule],
+      useClass: ImageUploadConfigService,
+    }),
   ],
   controllers: [CvController],
   providers: [CvService],

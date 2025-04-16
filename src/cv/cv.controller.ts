@@ -1,14 +1,29 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
 import { CvService } from './cv.service';
 import { CreateCvDto } from './dto/create-cv.dto';
 import { UpdateCvDto } from './dto/update-cv.dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FormDataParserInterceptor } from './interceptors/form-data-parser.interceptor';
 
 @Controller('cv')
 export class CvController {
   constructor(private readonly cvService: CvService) {}
 
   @Post()
-  create(@Body() createCvDto: CreateCvDto) {
+  @UseInterceptors(
+    FileInterceptor('file')
+  )
+  async create(
+    @Body() createCvDto: CreateCvDto,
+    @UploadedFile()
+    file?: Express.Multer.File,
+  ) {
+    if (file) {
+      createCvDto.path = `/uploads/${file.filename}`;
+    } else {
+      createCvDto.path = '/default/no-image.png';
+    }
+
     return this.cvService.create(createCvDto);
   }
 
@@ -23,7 +38,20 @@ export class CvController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCvDto: UpdateCvDto) {
+  @UseInterceptors(
+    FormDataParserInterceptor,
+    FileInterceptor('image')
+  )
+  async update(
+    @Param('id') id: string,
+    @Body() updateCvDto: UpdateCvDto,
+    @UploadedFile()
+    file?: Express.Multer.File,
+  ) {
+    if (file) {
+      updateCvDto.path = `/uploads/${file.filename}`;
+    }
+
     return this.cvService.update(+id, updateCvDto);
   }
 
