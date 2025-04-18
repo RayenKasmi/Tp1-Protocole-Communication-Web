@@ -9,6 +9,7 @@ import { SharedModule } from './common/shared.module';
 import { AuthMiddleware } from './common/middleware/auth.middleware';
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { CvControllerV2 } from './cv/cv.controller.v2';
+import { AuthModule } from './auth/auth.module';
 
 
 @Module({
@@ -35,6 +36,7 @@ import { CvControllerV2 } from './cv/cv.controller.v2';
     CvModule,
     SkillModule,
     SharedModule,
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

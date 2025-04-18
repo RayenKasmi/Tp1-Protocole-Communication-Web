@@ -9,4 +9,5 @@ export class UserService extends GenericCrudService<User> {
   constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {
     super(userRepository);
   }
+  
 }
