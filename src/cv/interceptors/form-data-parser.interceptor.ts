@@ -7,6 +7,7 @@ export class FormDataParserInterceptor implements NestInterceptor {
     const request = context.switchToHttp().getRequest();
     
     console.log('Request body before parsing:', request.body);
+    console.log('Request file:', request.file);
     
     if (request.body) {
       console.log('Body type:', typeof request.body);

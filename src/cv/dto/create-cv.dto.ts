@@ -1,7 +1,7 @@
+import { BadRequestException } from '@nestjs/common';
 import { Transform, Type } from 'class-transformer';
 import { IsNotEmpty, IsNumber, IsOptional, IsPositive, IsString, MaxLength, ValidateNested, IsArray } from 'class-validator';
 
-// New DTOs for handling relationships by ID or full object
 class UserIdDto {
   @IsNumber()
   @IsNotEmpty()
@@ -11,9 +11,9 @@ class UserIdDto {
 
 class SkillIdDto {
   @IsNumber()
-  @IsOptional()
+  @IsNotEmpty() 
   @Type(() => Number)
-  id?: number;
+  id: number;
 }
 
 export class CreateCvDto {
@@ -48,26 +48,13 @@ export class CreateCvDto {
   path?: string;
 
   @IsNotEmpty()
-  @ValidateNested()
   @Type(() => UserIdDto)
-  @Transform(({ value }) => {
-    if (typeof value === 'string') {
-      return JSON.parse(value);
-    }
-    return value;
-  }, { toClassOnly: true })
+  @ValidateNested()
   user: UserIdDto;
 
   @IsOptional()
+  @Type(() => SkillIdDto)
   @IsArray()
   @ValidateNested({ each: true })
-  @Type(() => SkillIdDto)
-  @Transform(({ value }) => {
-    if (typeof value === 'string') {
-      const parsed = JSON.parse(value);
-      return Array.isArray(parsed) ? parsed : [parsed];
-    }
-    return value;
-  }, { toClassOnly: true })
   skills?: SkillIdDto[];
 }
