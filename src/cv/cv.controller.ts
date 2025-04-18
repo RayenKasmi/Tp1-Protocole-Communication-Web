@@ -5,7 +5,10 @@ import { UpdateCvDto } from './dto/update-cv.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FormDataParserInterceptor } from './interceptors/form-data-parser.interceptor';
 
-@Controller('cv')
+@Controller({
+  path: 'cv',
+  version: '1',
+})
 export class CvController {
   constructor(private readonly cvService: CvService) {}
 

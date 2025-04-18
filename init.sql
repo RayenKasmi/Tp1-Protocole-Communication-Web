@@ -1,0 +1,2 @@
+GRANT ALL PRIVILEGES ON `tp1-web`.* TO 'user'@'%';
+FLUSH PRIVILEGES;
