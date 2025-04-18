@@ -3,6 +3,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { GetUser } from '../common/decorators/get-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -28,11 +29,11 @@ export class AuthController {
     @UseGuards(JwtAuthGuard)
     @Post('test')
     async test(
-        @Request() req: any,
+        @GetUser() user: any,
     ) {
         return { 
             message: 'Test endpoint', 
-            user: req.user 
+            user: user 
           };
     }
 }
