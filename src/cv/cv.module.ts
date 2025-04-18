@@ -9,12 +9,14 @@ import { SkillModule } from '../skill/skill.module';
 import { SharedModule } from '../common/shared.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { ImageUploadConfigService } from '../common/services/image-upload-config.service';
+import { AuthModule } from '../auth/auth.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Cv]),
     UserModule,
     SkillModule,
+    AuthModule,
     MulterModule.registerAsync({
       imports: [SharedModule],
       useClass: ImageUploadConfigService,

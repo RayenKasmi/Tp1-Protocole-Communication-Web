@@ -3,6 +3,15 @@ import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 
+export interface PayloadInterface {
+    username: string;
+    sub: number | string; //subject or user id
+    email?: string;
+    role?: string;
+    iat?: number; // Issued at timestamp
+    exp?: number; // Expiration timestamp
+  }
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(private configService: ConfigService) {

@@ -39,8 +39,4 @@ export class User {
     this.salt = await bcryptjs.genSalt();
     this.password = await bcryptjs.hash(this.password, this.salt);
   }
-
-  async validatePassword(password: string): Promise<boolean> {
-    return bcryptjs.compare(password, this.password);
-  }
 }
