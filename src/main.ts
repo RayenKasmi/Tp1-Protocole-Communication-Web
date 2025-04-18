@@ -22,7 +22,7 @@ async function bootstrap() {
   app.use(bodyParser.urlencoded({ extended: true, limit: '50mb' }));
   
   app.useStaticAssets(join(__dirname, '..', 'public'));
-  
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
