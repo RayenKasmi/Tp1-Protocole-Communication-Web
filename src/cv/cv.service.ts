@@ -37,12 +37,7 @@ export class CvService extends GenericCrudService<Cv> {
     }
 
     const cv = this.cvRepository.create({
-      name: createCvDto.name,
-      firstname: createCvDto.firstname, 
-      age: createCvDto.age,
-      cin: createCvDto.cin,
-      job: createCvDto.job,
-      path: createCvDto.path,
+      ...createCvDto,
       user: user,
       skills: skills,
     });
@@ -51,29 +46,34 @@ export class CvService extends GenericCrudService<Cv> {
   }
 
   async update(id: number, updateCvDto: UpdateCvDto): Promise<Cv> {
-    const cv = await this.findOne(id);
-    if (!cv) {
-      throw new NotFoundException(`CV with ID ${id} not found`);
-    }
-    if (updateCvDto.skills) {
-      const skills : Skill[] = [];
-      for (const skillDto of updateCvDto.skills) {
-        const existingSkill = await this.skillService.findOne(skillDto.id);
-        if(!existingSkill) {
-          throw new NotFoundException(`Skill with ID ${skillDto.id} not found`);
-        }
-        skills.push(existingSkill);
+    try {
+      const cv = await this.cvRepository.preload({ 
+        id,
+        ...updateCvDto,
+      });
+  
+      if (!cv) {
+        throw new NotFoundException(`Update failed: Cv with ID ${id} not found`);
       }
-      cv.skills = skills;
+
+      if (updateCvDto.skills) {
+        const skills : Skill[] = [];
+        for (const skillDto of updateCvDto.skills) {
+          const existingSkill = await this.skillService.findOne(skillDto.id);
+          if(!existingSkill) {
+            throw new NotFoundException(`Skill with ID ${skillDto.id} not found`);
+          }
+          skills.push(existingSkill);
+        }
+        cv.skills = skills;
+      }
+      return this.cvRepository.save(cv);
+    } 
+    catch (error) {
+        if (error instanceof NotFoundException) {
+            throw error; 
+        }
+        throw new Error(`Update failed: ${error.message}`);
     }
-    
-    if (updateCvDto.name) cv.name = updateCvDto.name;
-    if (updateCvDto.firstname) cv.firstname = updateCvDto.firstname;
-    if (updateCvDto.age) cv.age = updateCvDto.age;
-    if (updateCvDto.cin) cv.cin = updateCvDto.cin;
-    if (updateCvDto.job) cv.job = updateCvDto.job;
-    if (updateCvDto.path) cv.path = updateCvDto.path;
-    
-    return this.cvRepository.save(cv);
   }
 }
