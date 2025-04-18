@@ -31,6 +31,7 @@ services:
       - DB_PASSWORD=password
       - DB_NAME=tp1-web
       - PORT=3000
+      - JWT_SECRET=cc4d95ecabeb19a8c8ed9a3619ae87f2e887197f78a8baf09e0dc29785e0db69
     depends_on:
       mysql-tp1-web:
         condition: service_healthy

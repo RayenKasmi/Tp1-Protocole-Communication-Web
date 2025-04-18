@@ -1,4 +1,3 @@
-import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UserModule } from './user/user.module';
@@ -7,6 +6,10 @@ import { SkillModule } from './skill/skill.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SharedModule } from './common/shared.module';
+import { AuthMiddleware } from './common/middleware/auth.middleware';
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
+import { CvControllerV2 } from './cv/cv.controller.v2';
+
 
 @Module({
   imports: [
@@ -27,7 +30,7 @@ import { SharedModule } from './common/shared.module';
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: true, 
       }),
-    }),
+    }), 
     UserModule,
     CvModule,
     SkillModule,
@@ -36,4 +39,12 @@ import { SharedModule } from './common/shared.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule{
+  configure(consumer: MiddlewareConsumer){
+    consumer
+      .apply(AuthMiddleware)
+      .forRoutes(
+        CvControllerV2
+      )
+  }
+}
