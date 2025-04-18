@@ -1,9 +1,24 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  UploadedFile,
+  ParseFilePipe,
+  MaxFileSizeValidator,
+  FileTypeValidator,
+  Query,
+} from '@nestjs/common';
 import { CvService } from './cv.service';
 import { CreateCvDto } from './dto/create-cv.dto';
 import { UpdateCvDto } from './dto/update-cv.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FormDataParserInterceptor } from './interceptors/form-data-parser.interceptor';
+import { FilterCvDto } from './dto/filter-cv.dto';
 
 @Controller({
   path: 'cv',
@@ -31,8 +46,10 @@ export class CvController {
   }
 
   @Get()
-  findAll() {
-    return this.cvService.findAll();
+  findAll(
+    @Query() filterQuery: FilterCvDto
+  ) {
+    return this.cvService.findAll(filterQuery);
   }
 
   @Get(':id')
