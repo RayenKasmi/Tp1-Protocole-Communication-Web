@@ -44,7 +44,7 @@ async function bootstrap() {
     const email = randEmail();
 
     const user = await userService.create({
-      username: randUserName(),
+      username: randUserName().substring(0, 20),
       email,
       password: randPassword().toString(),
     });
