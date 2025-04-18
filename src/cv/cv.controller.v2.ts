@@ -18,7 +18,8 @@ export class CvControllerV2 {
 
   @Post()
   @UseInterceptors(
-    FileInterceptor('file')
+    FileInterceptor('file'),
+    FormDataParserInterceptor
   )
   async create(
     @Body() createCvDto: CreateCvDto,
@@ -47,8 +48,8 @@ export class CvControllerV2 {
 
   @Patch(':id')
   @UseInterceptors(
-    FormDataParserInterceptor,
-    FileInterceptor('image')
+    FileInterceptor('file'),
+    FormDataParserInterceptor
   )
   async update(
     @Param('id') id: string,
