@@ -6,10 +6,12 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class UserService extends GenericCrudService<User> {
-  constructor(@InjectRepository(User) private readonly userRepository: Repository<User>) {
+  constructor(
+    @InjectRepository(User) private readonly userRepository: Repository<User>,
+  ) {
     super(userRepository);
   }
-  
+
   async createWithRole(user: any): Promise<any> {
     const newUser = this.userRepository.create(user);
     return this.userRepository.save(newUser);

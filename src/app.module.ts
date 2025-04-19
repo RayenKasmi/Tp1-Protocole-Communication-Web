@@ -4,14 +4,13 @@ import { UserModule } from './user/user.module';
 import { CvModule } from './cv/cv.module';
 import { SkillModule } from './skill/skill.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule, ConfigService, ConfigType } from '@nestjs/config';
-import { SharedModule } from './common/shared.module';
+import { ConfigModule, ConfigType } from '@nestjs/config';
+import { CommonModule } from './common/common.module';
 import { AuthMiddleware } from './common/middleware/auth.middleware';
 import {
   MiddlewareConsumer,
   Module,
   NestModule,
-  RequestMethod,
 } from '@nestjs/common';
 import { CvControllerV2 } from './cv/cv.controller.v2';
 import { AuthModule } from './auth/auth.module';
@@ -42,7 +41,7 @@ import AppConfig from './config/app.config';
     UserModule,
     CvModule,
     SkillModule,
-    SharedModule,
+    CommonModule,
     AuthModule,
   ],
   controllers: [AppController],

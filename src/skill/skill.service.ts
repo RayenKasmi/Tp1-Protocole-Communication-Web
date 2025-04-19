@@ -6,7 +6,10 @@ import { Repository } from 'typeorm';
 
 @Injectable()
 export class SkillService extends GenericCrudService<Skill> {
-  constructor(@InjectRepository(Skill) private readonly skillRepository: Repository<Skill>) {
+  constructor(
+    @InjectRepository(Skill)
+    private readonly skillRepository: Repository<Skill>,
+  ) {
     super(skillRepository);
   }
 }
