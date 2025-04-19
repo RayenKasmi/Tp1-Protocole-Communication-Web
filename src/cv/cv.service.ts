@@ -4,10 +4,11 @@ import { UpdateCvDto } from './dto/update-cv.dto';
 import { GenericCrudService } from '../common/services/generic.crud.service';
 import { Cv } from './entities/cv.entity';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { ILike, Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import { SkillService } from '../skill/skill.service';
 import { Skill } from '../skill/entities/skill.entity';
+import { FilterCvDto } from './dto/filter-cv.dto';
 
 @Injectable()
 export class CvService extends GenericCrudService<Cv> {
@@ -17,6 +18,30 @@ export class CvService extends GenericCrudService<Cv> {
     private readonly skillService: SkillService,
   ) {
     super(cvRepository);
+  }
+
+  async findAll(filter?: FilterCvDto): Promise<Cv[]> {
+    const { age, criteria } = filter || {};
+
+    const where: any[] = [];
+
+    if (criteria) {
+      where.push(
+        { name: ILike(`%${criteria}%`) },
+        { firstname: ILike(`%${criteria}%`) },
+        { job: ILike(`%${criteria}%`) },
+      );
+    }
+
+    if (age !== undefined) {
+      where.push({ age });
+    }
+
+    if (where.length === 0) {
+      return this.cvRepository.find();
+    }
+
+    return this.cvRepository.find({ where });
   }
 
   async create(createCvDto: CreateCvDto): Promise<Cv> {
