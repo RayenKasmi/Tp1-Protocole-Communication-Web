@@ -5,6 +5,7 @@ import { UpdateCvDto } from './dto/update-cv.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FormDataParserInterceptor } from './interceptors/form-data-parser.interceptor';
 import { UserService } from '../user/user.service';
+import { GetUser } from '../common/decorators/get-user.decorator';
 
 @Controller({
     path: 'cv',
@@ -24,6 +25,7 @@ export class CvControllerV2 {
   async create(
     @Body() createCvDto: CreateCvDto,
     @Request() req,
+    @GetUser() user: any,
     @UploadedFile()
     file?: Express.Multer.File,
   ) {
@@ -32,8 +34,7 @@ export class CvControllerV2 {
     } else {
       createCvDto.path = '/default/no-image.png';
     }
-    createCvDto.user = { id: req.userId };
-    return this.cvService.create(createCvDto);
+    return this.cvService.createWithUser(createCvDto, user);
   }
 
   @Get()

@@ -47,10 +47,10 @@ export class CreateCvDto {
   @IsString()
   path?: string;
 
-  @IsNotEmpty()
-  @Type(() => UserIdDto)
-  @ValidateNested()
-  user: UserIdDto;
+  // @IsNotEmpty()
+  // @Type(() => UserIdDto)
+  // @ValidateNested()
+  // user: UserIdDto;
 
   @IsOptional()
   @Type(() => SkillIdDto)

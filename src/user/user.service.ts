@@ -10,4 +10,8 @@ export class UserService extends GenericCrudService<User> {
     super(userRepository);
   }
   
+  async createWithRole(user: any): Promise<any> {
+    const newUser = this.userRepository.create(user);
+    return this.userRepository.save(newUser);
+  }
 }

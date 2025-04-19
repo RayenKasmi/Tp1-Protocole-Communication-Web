@@ -8,6 +8,7 @@ import { Repository } from 'typeorm';
 import { UserService } from '../user/user.service';
 import { SkillService } from '../skill/skill.service';
 import { Skill } from '../skill/entities/skill.entity';
+import { UserRole } from '../user/entities/user.entity';
 
 @Injectable()
 export class CvService extends GenericCrudService<Cv> {
@@ -19,10 +20,35 @@ export class CvService extends GenericCrudService<Cv> {
     super(cvRepository);
   }
 
-  async create(createCvDto: CreateCvDto): Promise<Cv> {
-    const user = await this.userService.findOne(createCvDto.user.id);
+  // async create(createCvDto: CreateCvDto): Promise<Cv> {
+  //   const user = await this.userService.findOne(createCvDto.user.id);
+  //   if (!user) {
+  //     throw new NotFoundException(`User with ID ${createCvDto.user.id} not found`);
+  //   }
+
+  //   const skills: Skill[] = [];
+  //   if (createCvDto.skills && createCvDto.skills.length > 0) {
+  //     for (const skillDto of createCvDto.skills) {
+  //       const existingSkill = await this.skillService.findOne(skillDto.id);
+  //       if(!existingSkill) {
+  //         throw new NotFoundException(`Skill with ID ${skillDto.id} not found`);
+  //       }
+  //       skills.push(existingSkill);        
+  //     }
+  //   }
+
+  //   const cv = this.cvRepository.create({
+  //     ...createCvDto,
+  //     user: user,
+  //     skills: skills,
+  //   });
+    
+  //   return this.cvRepository.save(cv);
+  // }
+
+  async createWithUser(createCvDto: CreateCvDto, user: any): Promise<Cv> {
     if (!user) {
-      throw new NotFoundException(`User with ID ${createCvDto.user.id} not found`);
+      throw new NotFoundException(`User with ID ${user.userId} not found`);
     }
 
     const skills: Skill[] = [];
@@ -38,7 +64,7 @@ export class CvService extends GenericCrudService<Cv> {
 
     const cv = this.cvRepository.create({
       ...createCvDto,
-      user: user,
+      user: user.userId,
       skills: skills,
     });
     
@@ -76,4 +102,13 @@ export class CvService extends GenericCrudService<Cv> {
         throw new Error(`Update failed: ${error.message}`);
     }
   }
+
+  async findAllByRole(user: any): Promise<Cv[]> {
+    if (user.role === UserRole.ADMIN) {
+      return this.cvRepository.find(); 
+    } else {
+      return this.cvRepository.find({ where: { user: { id: user.id } } }); 
+    }
+  }
+
 }
