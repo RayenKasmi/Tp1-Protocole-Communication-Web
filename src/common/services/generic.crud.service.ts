@@ -1,13 +1,25 @@
 import { NotFoundException } from '@nestjs/common/exceptions';
 import { Repository, DeepPartial, ObjectLiteral } from 'typeorm';
+import { PaginationQueryDto } from '../dto/pagination-query.dto';
 
 // A generic base service class that provides basic CRUD operations
 
 export class GenericCrudService<T extends ObjectLiteral> {
-  constructor(private readonly repo: Repository<T>) { }
+  constructor(private readonly repo: Repository<T>) {}
 
-  findAll(): Promise<T[]> {
-    return this.repo.find();
+  findAll({
+    paginationQuery,
+    where,
+  }: {
+    paginationQuery?: PaginationQueryDto;
+    where?: any[];
+  }): Promise<T[]> {
+    const { limit, offset } = paginationQuery ?? {};
+    return this.repo.find({
+      skip: offset,
+      take: limit,
+      where,
+    });
   }
 
   async findOne(id: any): Promise<T> {
@@ -18,7 +30,6 @@ export class GenericCrudService<T extends ObjectLiteral> {
     }
     return result;
   }
-
 
   async findOneBy(criteria: any): Promise<T> {
     const result = await this.repo.findOne({ where: criteria });
@@ -31,13 +42,16 @@ export class GenericCrudService<T extends ObjectLiteral> {
 
   async update(id: any, data: DeepPartial<T>): Promise<T> {
     try {
-      const entity = await this.repo.preload({ //creates an entity instance with the existing values and the updates
+      const entity = await this.repo.preload({
+        //creates an entity instance with the existing values and the updates
         id,
         ...data,
       });
 
       if (!entity) {
-        throw new NotFoundException(`Update failed: Entity with ID ${id} not found`);
+        throw new NotFoundException(
+          `Update failed: Entity with ID ${id} not found`,
+        );
       }
 
       return await this.repo.save(entity);
@@ -49,15 +63,14 @@ export class GenericCrudService<T extends ObjectLiteral> {
     }
   }
 
-
   async remove(id: any): Promise<void> {
     try {
-      const result = await this.repo.delete(id);  //could use softDelete instead or later on
+      const result = await this.repo.delete(id); //could use softDelete instead or later on
 
-      if (result.affected === 0) { //entity not found
+      if (result.affected === 0) {
+        //entity not found
         throw new NotFoundException(`Entity with ID ${id} not found`);
       }
-
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
