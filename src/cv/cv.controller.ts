@@ -54,7 +54,7 @@ export class CvController {
   @Get()
   @UseGuards(JwtAuthGuard)
   async findAll(
-    @GetUser() user: User,
+    @GetUser() user: any,
     @Query() filter: FilterCvDto,
     @Query() paginationQuery: PaginationQueryDto,
   ) {

@@ -16,4 +16,8 @@ export default registerAs('app', () => ({
       ? parseInt(process.env.JWT_EXPIRATION, 10)
       : 3600,
   },
+  paths: {
+    image: 'public/uploads/',
+    default: 'public/no-img',
+  },
 }));
