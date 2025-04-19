@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { CvService } from './cv.service';
 import { CvController } from './cv.controller';
 import { CvControllerV2 } from './cv.controller.v2';
@@ -9,6 +9,7 @@ import { SkillModule } from '../skill/skill.module';
 import { SharedModule } from '../common/shared.module';
 import { MulterModule } from '@nestjs/platform-express';
 import { ImageUploadConfigService } from '../common/services/image-upload-config.service';
+import { AuthMiddleware } from '../common/middleware/auth.middleware';
 
 @Module({
   imports: [
@@ -23,4 +24,8 @@ import { ImageUploadConfigService } from '../common/services/image-upload-config
   controllers: [CvController, CvControllerV2],
   providers: [CvService],
 })
-export class CvModule {}
+export class CvModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(AuthMiddleware).forRoutes(CvControllerV2);
+  }
+}

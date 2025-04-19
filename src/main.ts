@@ -23,6 +23,11 @@ async function bootstrap() {
   
   app.useStaticAssets(join(__dirname, '..', 'public'));
 
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '2',
+  });
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

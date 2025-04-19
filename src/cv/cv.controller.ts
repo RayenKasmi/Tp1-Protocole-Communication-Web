@@ -19,6 +19,7 @@ import { UpdateCvDto } from './dto/update-cv.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FormDataParserInterceptor } from './interceptors/form-data-parser.interceptor';
 import { FilterCvDto } from './dto/filter-cv.dto';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 
 @Controller({
   path: 'cv',
@@ -48,9 +49,10 @@ export class CvController {
 
   @Get()
   findAll(
-    @Query() filterQuery: FilterCvDto
+    @Query() paginationQuery: PaginationQueryDto,
+    @Query() filterQuery: FilterCvDto,
   ) {
-    return this.cvService.findAll(filterQuery);
+    return this.cvService.findAllBy(filterQuery, paginationQuery);
   }
 
   @Get(':id')

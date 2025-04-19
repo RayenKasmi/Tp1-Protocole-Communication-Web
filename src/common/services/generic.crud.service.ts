@@ -4,14 +4,21 @@ import { PaginationQueryDto } from '../dto/pagination-query.dto';
 
 // A generic base service class that provides basic CRUD operations
 
-export class GenericCrudService<T extends ObjectLiteral> {
+export abstract class GenericCrudService<T extends ObjectLiteral> {
   constructor(private readonly repo: Repository<T>) {}
 
-  findAll(paginationQuery?: PaginationQueryDto): Promise<T[]> {
+  findAll({
+    paginationQuery,
+    where,
+  }: {
+    paginationQuery?: PaginationQueryDto;
+    where?: any[];
+  }): Promise<T[]> {
     const { limit, offset } = paginationQuery ?? {};
     return this.repo.find({
       skip: offset,
       take: limit,
+      where,
     });
   }
 
