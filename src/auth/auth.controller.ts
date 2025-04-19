@@ -5,6 +5,7 @@ import { LoginDto } from './dto/login.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { RolesGuard } from 'src/common/guards/roles.guard';
 import { Roles } from 'src/common/decorators/roles.decorator';
+import { GetUser } from '../common/decorators/get-user.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -30,11 +31,11 @@ export class AuthController {
     @UseGuards(JwtAuthGuard)
     @Post('test')
     async test(
-        @Request() req: any,
+        @GetUser() user: any,
     ) {
         return { 
             message: 'Test endpoint', 
-            user: req.user 
+            user: user 
           };
     }
 
@@ -45,7 +46,7 @@ export class AuthController {
     {
         return { 
             message: 'Only admins can access this endpoint', 
-            user: req.user 
+            user: user 
           };
     }
 
