@@ -38,7 +38,7 @@ export class CvControllerV2 {
 
   @Get()
   findAll() {
-    return this.cvService.findAll();
+    return this.cvService.findAll({});
   }
 
   @Get(':id')

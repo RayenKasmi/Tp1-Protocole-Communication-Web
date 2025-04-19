@@ -1,4 +1,6 @@
-import { OmitType } from '@nestjs/mapped-types';
+import { OmitType, PartialType } from '@nestjs/mapped-types';
 import { CreateCvDto } from './create-cv.dto';
 
-export class UpdateCvDto extends OmitType(CreateCvDto, ['user']) {}
+export class UpdateCvDto extends PartialType(
+  OmitType(CreateCvDto, ['user'] as const),
+) {}
