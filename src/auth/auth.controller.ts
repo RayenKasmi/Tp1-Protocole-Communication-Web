@@ -42,7 +42,7 @@ export class AuthController {
     @UseGuards(JwtAuthGuard,RolesGuard)
     @Roles('admin')
     @Get('admin')
-    async admin( @Request() req: any) 
+    async admin( @GetUser() user: any)
     {
         return { 
             message: 'Only admins can access this endpoint', 
