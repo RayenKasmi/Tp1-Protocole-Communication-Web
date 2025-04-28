@@ -1,4 +1,16 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseInterceptors,
+  UploadedFile,
+  UseGuards,
+  Query,
+} from '@nestjs/common';
 import { CvService } from './cv.service';
 import { CreateCvDto } from './dto/create-cv.dto';
 import { UpdateCvDto } from './dto/update-cv.dto';
@@ -7,6 +19,8 @@ import { FormDataParserInterceptor } from './interceptors/form-data-parser.inter
 import { GetUser } from '../common/decorators/get-user.decorator';
 import { User } from '../user/entities/user.entity';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { FilterCvDto } from './dto/filter-cv.dto';
 
 @Controller({
   path: 'cv',
@@ -41,8 +55,10 @@ export class CvController {
   @UseGuards(JwtAuthGuard)
   async findAll(
     @GetUser() user: any,
+    @Query() filter: FilterCvDto,
+    @Query() paginationQuery: PaginationQueryDto,
   ) {
-    return this.cvService.findAllByRole(user);
+    return this.cvService.findAllByCriteria(user, filter, paginationQuery);
   }
 
   @Get(':id')

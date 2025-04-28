@@ -6,4 +6,4 @@ import { ImageUploadConfigService } from './services/image-upload-config.service
   providers: [UuidService, ImageUploadConfigService],
   exports: [UuidService],
 })
-export class SharedModule {}
+export class CommonModule {}

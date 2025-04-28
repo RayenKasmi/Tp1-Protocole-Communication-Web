@@ -1,28 +1,40 @@
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AuthController } from './auth.controller';
-import { ConfigModule, ConfigService } from '@nestjs/config';
+import { ConfigModule, ConfigService, ConfigType } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { UserModule } from '../user/user.module';
-import { PassportModule } from '@nestjs/passport';
+import { AuthGuard, PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import appConfig from '../config/app.config';
+import AppConfig from '../config/app.config';
+import { RolesGuard } from '../common/guards/roles.guard';
+import { HashingService } from './hashing/hashing.service';
+import { BcryptService } from './hashing/bcrypt.service';
 
 @Module({
   imports: [
     PassportModule,
     ConfigModule,
-    UserModule,
+    forwardRef(() => UserModule),
     JwtModule.registerAsync({
-      imports: [ConfigModule],
-      inject: [ConfigService],
-      useFactory: (configService: ConfigService) => ({
-        secret: configService.get<string>('JWT_SECRET'),
-        signOptions: { expiresIn: '24h' },
+      imports: [ConfigModule.forFeature(appConfig)],
+      inject: [AppConfig.KEY],
+      useFactory: (config: ConfigType<typeof AppConfig>) => ({
+        secret: config.authorization.jwt,
+        signOptions: { expiresIn: `${config.authorization.expiration}m` },
       }),
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, JwtStrategy],
+  providers: [
+    AuthService,
+    JwtStrategy,
+    {
+      provide: HashingService,
+      useClass: BcryptService,
+    },
+  ],
   exports: [AuthService, JwtStrategy],
 })
 export class AuthModule {}

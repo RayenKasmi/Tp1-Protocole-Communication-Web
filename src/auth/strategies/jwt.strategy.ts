@@ -4,13 +4,13 @@ import { ExtractJwt, Strategy } from 'passport-jwt';
 import { ConfigService } from '@nestjs/config';
 
 export interface PayloadInterface {
-    username: string;
-    sub: number | string; //subject or user id
-    email?: string;
-    role?: string;
-    iat?: number; // Issued at timestamp
-    exp?: number; // Expiration timestamp
-  }
+  username: string;
+  sub: number | string; //subject or user id
+  email?: string;
+  role?: string;
+  iat?: number; // Issued at timestamp
+  exp?: number; // Expiration timestamp
+}
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -28,10 +28,10 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(payload: PayloadInterface) {
-    return { 
-      userId: payload.sub, 
+    return {
+      userId: payload.sub,
       username: payload.username,
-      role: payload.role 
+      role: payload.role,
     };
   }
 }
