@@ -1,6 +1,6 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { CvController } from './cv.controller';
-import { CvService } from './cv.service';
+import { CvService } from './services/cv.service';
 
 describe('CvController', () => {
   let controller: CvController;

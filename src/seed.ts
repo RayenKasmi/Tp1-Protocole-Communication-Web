@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { CvService } from './cv/cv.service';
+import { CvService } from './cv/services/cv.service';
 import { UserService } from './user/user.service';
 import { SkillService } from './skill/skill.service';
 import {

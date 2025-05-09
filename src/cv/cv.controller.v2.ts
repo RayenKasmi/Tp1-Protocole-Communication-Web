@@ -1,5 +1,5 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, Request, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { CvService } from './cv.service';
+import { CvService } from './services/cv.service';
 import { CreateCvDto } from './dto/create-cv.dto';
 import { UpdateCvDto } from './dto/update-cv.dto';
 import { FileInterceptor } from '@nestjs/platform-express';

@@ -10,6 +10,8 @@ import { AuthMiddleware } from './common/middleware/auth.middleware';
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
 import { CvControllerV2 } from './cv/cv.controller.v2';
 import { AuthModule } from './auth/auth.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { CvHistoryModule } from './cv-history/cv-history.module';
 
 
 @Module({
@@ -32,11 +34,13 @@ import { AuthModule } from './auth/auth.module';
         synchronize: true, 
       }),
     }), 
+    EventEmitterModule.forRoot(),
     UserModule,
     CvModule,
     SkillModule,
     SharedModule,
     AuthModule,
+    CvHistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

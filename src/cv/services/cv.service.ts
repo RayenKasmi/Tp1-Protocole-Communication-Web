@@ -1,14 +1,17 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateCvDto } from './dto/create-cv.dto';
-import { UpdateCvDto } from './dto/update-cv.dto';
-import { GenericCrudService } from '../common/services/generic.crud.service';
-import { Cv } from './entities/cv.entity';
+import { CreateCvDto } from '../dto/create-cv.dto';
+import { UpdateCvDto } from '../dto/update-cv.dto';
+import { GenericCrudService } from '../../common/services/generic.crud.service';
+import { Cv } from '../entities/cv.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { UserService } from '../user/user.service';
-import { SkillService } from '../skill/skill.service';
-import { Skill } from '../skill/entities/skill.entity';
-import { UserRole } from '../user/entities/user.entity';
+import { UserService } from '../../user/user.service';
+import { SkillService } from '../../skill/skill.service';
+import { Skill } from '../../skill/entities/skill.entity';
+import { UserRole } from '../../user/entities/user.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
+import { CvEvent } from 'src/cv-history/events/cv-event';
+import { CvAction } from 'src/cv-history/entities/cv-history.entity';
 
 @Injectable()
 export class CvService extends GenericCrudService<Cv> {
@@ -16,6 +19,7 @@ export class CvService extends GenericCrudService<Cv> {
     @InjectRepository(Cv) private readonly cvRepository: Repository<Cv>,
     private readonly userService: UserService,
     private readonly skillService: SkillService,
+    private eventEmitter: EventEmitter2,
   ) {
     super(cvRepository);
   }
@@ -42,7 +46,7 @@ export class CvService extends GenericCrudService<Cv> {
   //     user: user,
   //     skills: skills,
   //   });
-    
+
   //   return this.cvRepository.save(cv);
   // }
 
@@ -55,10 +59,10 @@ export class CvService extends GenericCrudService<Cv> {
     if (createCvDto.skills && createCvDto.skills.length > 0) {
       for (const skillDto of createCvDto.skills) {
         const existingSkill = await this.skillService.findOne(skillDto.id);
-        if(!existingSkill) {
+        if (!existingSkill) {
           throw new NotFoundException(`Skill with ID ${skillDto.id} not found`);
         }
-        skills.push(existingSkill);        
+        skills.push(existingSkill);
       }
     }
 
@@ -67,48 +71,93 @@ export class CvService extends GenericCrudService<Cv> {
       user: user.userId,
       skills: skills,
     });
-    
-    return this.cvRepository.save(cv);
+
+    const savedCv = await this.cvRepository.save(cv);
+
+    this.eventEmitter.emit('cv.action', new CvEvent(CvAction.CREATED, savedCv.id, user.userId));
+
+    return savedCv;
   }
 
-  async update(id: number, updateCvDto: UpdateCvDto): Promise<Cv> {
+  async updateWithUser(id: number, updateCvDto: UpdateCvDto, user: any): Promise<Cv> {
     try {
-      const cv = await this.cvRepository.preload({ 
+      if (!user) {
+        throw new Error('User is undefined. Authentication may have failed.');
+      }
+      const cv = await this.cvRepository.preload({
         id,
         ...updateCvDto,
       });
-  
+
       if (!cv) {
         throw new NotFoundException(`Update failed: Cv with ID ${id} not found`);
       }
 
       if (updateCvDto.skills) {
-        const skills : Skill[] = [];
+        const skills: Skill[] = [];
         for (const skillDto of updateCvDto.skills) {
           const existingSkill = await this.skillService.findOne(skillDto.id);
-          if(!existingSkill) {
+          if (!existingSkill) {
             throw new NotFoundException(`Skill with ID ${skillDto.id} not found`);
           }
           skills.push(existingSkill);
         }
         cv.skills = skills;
       }
-      return this.cvRepository.save(cv);
-    } 
+
+      const updatedCv = await this.cvRepository.save(cv);
+
+      this.eventEmitter.emit('cv.action', new CvEvent(CvAction.UPDATED, updatedCv.id, user.userId));
+
+      return updatedCv;
+    }
     catch (error) {
-        if (error instanceof NotFoundException) {
-            throw error; 
-        }
-        throw new Error(`Update failed: ${error.message}`);
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new Error(`Update failed: ${error.message}`);
     }
   }
 
   async findAllByRole(user: any): Promise<Cv[]> {
+    if (!user) {
+      throw new Error('User is undefined. Authentication may have failed.');
+    }
     if (user.role === UserRole.ADMIN) {
-      return this.cvRepository.find(); 
+      return this.cvRepository.find();
     } else {
-      return this.cvRepository.find({ where: { user: { id: user.id } } }); 
+      return this.cvRepository.find({ where: { user: { id: user.userId } } });
     }
   }
+
+  async removeWithUser(id: number, user: any): Promise<void> {
+    if (!user) {
+      throw new NotFoundException(`User with ID ${user.userId} not found`);
+    }
+
+    const cv = await this.cvRepository.findOne({ where: { id } });
+
+    if (!cv) {
+      throw new NotFoundException(`Cv with ID ${id} not found`);
+    }
+
+    try {
+      const result = await this.cvRepository.delete(id);
+
+      if (result.affected === 0) {
+        throw new NotFoundException(`Cv with ID ${id} not found`);
+      }
+
+      this.eventEmitter.emit('cv.action', new CvEvent(CvAction.DELETED, id, user.userId));
+
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      throw new Error(`Delete failed: ${error.message}`);
+    }
+  }
+
+
 
 }

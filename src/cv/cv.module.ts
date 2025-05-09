@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { CvService } from './cv.service';
+import { CvService } from './services/cv.service';
 import { CvController } from './cv.controller';
 import { CvControllerV2 } from './cv.controller.v2';
 import { TypeOrmModule } from '@nestjs/typeorm';
