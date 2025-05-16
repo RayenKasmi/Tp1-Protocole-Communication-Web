@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { CvControllerV2 } from './cv/cv.controller.v2';
 import { AuthModule } from './auth/auth.module';
+import { MessagesModule } from './messages/messages.module';
 import appConfig from './config/app.config';
 import AppConfig from './config/app.config';
 
@@ -43,6 +44,7 @@ import AppConfig from './config/app.config';
     SkillModule,
     CommonModule,
     AuthModule,
+    MessagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

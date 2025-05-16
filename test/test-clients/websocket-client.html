@@ -1,0 +1,319 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebSocket Test Client</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .panel {
+            flex: 1;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            padding: 15px;
+        }
+        .message-list {
+            height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f9f9f9;
+        }
+        .message {
+            margin-bottom: 10px;
+            padding: 8px;
+            border-radius: 5px;
+        }
+        .sent {
+            background: #dcf8c6;
+            text-align: right;
+            margin-left: 20%;
+        }
+        .received {
+            background: #f1f0f0;
+            margin-right: 20%;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input, textarea, button {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        .status {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .connected {
+            background: #d4edda;
+            color: #155724;
+        }
+        .disconnected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .log-area {
+            height: 150px;
+            background: #333;
+            color: #fff;
+            padding: 10px;
+            font-family: monospace;
+            overflow-y: auto;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>WebSocket Test Client</h1>
+    
+    <div class="form-group">
+        <label for="token">JWT Token:</label>
+        <input type="text" id="token" placeholder="Paste your JWT token here">
+    </div>
+
+    <button id="connectBtn">Connect to WebSocket</button>
+    <div id="status" class="status disconnected">Disconnected</div>
+
+    <div class="container">
+        <div class="panel">
+            <h2>Messages</h2>
+            <div id="messageList" class="message-list"></div>
+            
+            <div class="form-group">
+                <label for="receiver">Receiver Username:</label>
+                <input type="text" id="receiver" placeholder="Enter receiver's username">
+            </div>
+            
+            <div class="form-group">
+                <label for="messageContent">Message:</label>
+                <textarea id="messageContent" placeholder="Type your message here" rows="3"></textarea>
+            </div>
+            
+            <button id="sendBtn" disabled>Send Message</button>
+        </div>
+        
+        <div class="panel">
+            <h2>Event Log</h2>
+            <div id="logArea" class="log-area"></div>
+            
+            <div class="form-group">
+                <label for="eventName">Custom Event:</label>
+                <input type="text" id="eventName" placeholder="Event name">
+            </div>
+            
+            <div class="form-group">
+                <label for="eventData">Event Data (JSON):</label>
+                <textarea id="eventData" placeholder="{ }" rows="3"></textarea>
+            </div>
+            
+            <button id="emitBtn" disabled>Emit Event</button>
+        </div>
+    </div>
+
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <script>
+        // Elements
+        const tokenInput = document.getElementById('token');
+        const connectBtn = document.getElementById('connectBtn');
+        const statusDiv = document.getElementById('status');
+        const messageList = document.getElementById('messageList');
+        const receiverInput = document.getElementById('receiver');
+        const messageContentInput = document.getElementById('messageContent');
+        const sendBtn = document.getElementById('sendBtn');
+        const logArea = document.getElementById('logArea');
+        const eventNameInput = document.getElementById('eventName');
+        const eventDataInput = document.getElementById('eventData');
+        const emitBtn = document.getElementById('emitBtn');
+        
+        // Socket instance
+        let socket;
+        
+        // Log function
+        function log(message, data = null) {
+            const now = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            
+            if (data) {
+                logEntry.textContent = `[${now}] ${message}: ${JSON.stringify(data)}`;
+            } else {
+                logEntry.textContent = `[${now}] ${message}`;
+            }
+            
+            logArea.appendChild(logEntry);
+            logArea.scrollTop = logArea.scrollHeight;
+        }
+        
+        // Add message to the UI
+        function addMessage(content, sender, isSent = false) {
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            messageDiv.classList.add(isSent ? 'sent' : 'received');
+            
+            const senderDiv = document.createElement('div');
+            senderDiv.style.fontWeight = 'bold';
+            senderDiv.textContent = sender;
+            
+            const contentDiv = document.createElement('div');
+            contentDiv.textContent = content;
+            
+            messageDiv.appendChild(senderDiv);
+            messageDiv.appendChild(contentDiv);
+            messageList.appendChild(messageDiv);
+            messageList.scrollTop = messageList.scrollHeight;
+        }
+        
+        // Connect to socket
+        connectBtn.addEventListener('click', () => {
+            const token = tokenInput.value.trim();
+            
+            if (!token) {
+                alert('Please enter a JWT token');
+                return;
+            }
+            
+            // Disconnect existing socket if any
+            if (socket) {
+                socket.disconnect();
+                log('Disconnected from previous connection');
+            }
+            
+            try {
+                socket = io('http://localhost:3000/messages', {
+                    auth: {
+                        token: token
+                    }
+                });
+                
+                // Connection events
+                socket.on('connect', () => {
+                    statusDiv.textContent = 'Connected';
+                    statusDiv.className = 'status connected';
+                    sendBtn.disabled = false;
+                    emitBtn.disabled = false;
+                    log('Connected to WebSocket server');
+                });
+                
+                socket.on('disconnect', () => {
+                    statusDiv.textContent = 'Disconnected';
+                    statusDiv.className = 'status disconnected';
+                    sendBtn.disabled = true;
+                    emitBtn.disabled = true;
+                    log('Disconnected from WebSocket server');
+                });
+                
+                socket.on('error', (error) => {
+                    log('Error', error);
+                });
+                
+                // Message events
+                socket.on('message_sent', (data) => {
+                    log('Message sent confirmation', data);
+                });
+                
+                socket.on('receive_message', (message) => {
+                    log('Received message', message);
+                    addMessage(message.content, message.sender.username);
+                });
+                
+                // Generic event handler for debugging
+                const originalEmit = socket.emit;
+                socket.emit = function() {
+                    log('Emitting', { 
+                        event: arguments[0],
+                        data: arguments[1] || {}
+                    });
+                    return originalEmit.apply(this, arguments);
+                };
+                
+            } catch (error) {
+                log('Connection error', error);
+                alert('Failed to connect: ' + error.message);
+            }
+        });
+        
+        // Send message
+        sendBtn.addEventListener('click', () => {
+            const receiver = receiverInput.value.trim();
+            const content = messageContentInput.value.trim();
+            
+            if (!receiver || !content) {
+                alert('Please enter both receiver and message content');
+                return;
+            }
+            
+            if (!socket || !socket.connected) {
+                alert('Not connected to server');
+                return;
+            }
+            
+            const message = {
+                receiverUsername: receiver,
+                content: content
+            };
+            
+            socket.emit('send_message', message);
+            addMessage(content, 'You', true);
+            messageContentInput.value = '';
+        });
+        
+        // Emit custom event
+        emitBtn.addEventListener('click', () => {
+            const eventName = eventNameInput.value.trim();
+            let eventData = {};
+            
+            if (!eventName) {
+                alert('Please enter an event name');
+                return;
+            }
+            
+            if (!socket || !socket.connected) {
+                alert('Not connected to server');
+                return;
+            }
+            
+            try {
+                const dataString = eventDataInput.value.trim();
+                if (dataString) {
+                    eventData = JSON.parse(dataString);
+                }
+                
+                socket.emit(eventName, eventData);
+                log(`Emitted custom event: ${eventName}`, eventData);
+            } catch (error) {
+                alert('Invalid JSON data: ' + error.message);
+            }
+        });
+        
+        // Log initial state
+        log('Client initialized. Please connect to a server.');
+    </script>
+</body>
+</html>

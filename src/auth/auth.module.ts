@@ -11,6 +11,7 @@ import AppConfig from '../config/app.config';
 import { RolesGuard } from '../common/guards/roles.guard';
 import { HashingService } from './hashing/hashing.service';
 import { BcryptService } from './hashing/bcrypt.service';
+import { WsJwtGuard } from './guards/ws-jwt.guard';
 
 @Module({
   imports: [
@@ -26,15 +27,15 @@ import { BcryptService } from './hashing/bcrypt.service';
       }),
     }),
   ],
-  controllers: [AuthController],
-  providers: [
+  controllers: [AuthController],  providers: [
     AuthService,
     JwtStrategy,
     {
       provide: HashingService,
       useClass: BcryptService,
     },
+    WsJwtGuard,
   ],
-  exports: [AuthService, JwtStrategy],
+  exports: [AuthService, JwtStrategy, JwtModule, WsJwtGuard],
 })
 export class AuthModule {}
