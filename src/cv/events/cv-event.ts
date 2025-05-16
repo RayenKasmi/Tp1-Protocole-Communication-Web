@@ -1,4 +1,4 @@
-import { CvAction } from "../entities/cv-history.entity";
+import { CvAction } from "../../cv/entities/cv-history.entity";
 
 export class CvEvent{
     constructor(

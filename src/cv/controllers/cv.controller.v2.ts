@@ -1,11 +1,11 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, UseInterceptors, UploadedFile, ParseFilePipe, MaxFileSizeValidator, FileTypeValidator, Request, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { CvService } from './services/cv.service';
-import { CreateCvDto } from './dto/create-cv.dto';
-import { UpdateCvDto } from './dto/update-cv.dto';
+import { CvService } from '../services/cv.service';
+import { CreateCvDto } from '../dto/create-cv.dto';
+import { UpdateCvDto } from '../dto/update-cv.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { FormDataParserInterceptor } from './interceptors/form-data-parser.interceptor';
-import { UserService } from '../user/user.service';
-import { GetUser } from '../common/decorators/get-user.decorator';
+import { FormDataParserInterceptor } from '../interceptors/form-data-parser.interceptor';
+import { UserService } from '../../user/user.service';
+import { GetUser } from '../../common/decorators/get-user.decorator';
 
 @Controller({
     path: 'cv',

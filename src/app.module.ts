@@ -8,10 +8,9 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { SharedModule } from './common/shared.module';
 import { AuthMiddleware } from './common/middleware/auth.middleware';
 import { MiddlewareConsumer, Module, NestModule, RequestMethod } from '@nestjs/common';
-import { CvControllerV2 } from './cv/cv.controller.v2';
+import { CvControllerV2 } from './cv/controllers/cv.controller.v2';
 import { AuthModule } from './auth/auth.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
-import { CvHistoryModule } from './cv-history/cv-history.module';
 
 
 @Module({
@@ -40,7 +39,6 @@ import { CvHistoryModule } from './cv-history/cv-history.module';
     SkillModule,
     SharedModule,
     AuthModule,
-    CvHistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

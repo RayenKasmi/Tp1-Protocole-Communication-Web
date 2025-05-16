@@ -10,8 +10,8 @@ import { SkillService } from '../../skill/skill.service';
 import { Skill } from '../../skill/entities/skill.entity';
 import { UserRole } from '../../user/entities/user.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { CvEvent } from 'src/cv-history/events/cv-event';
-import { CvAction } from 'src/cv-history/entities/cv-history.entity';
+import { CvEvent } from '../events/cv-event';
+import { CvAction } from '../entities/cv-history.entity';
 
 @Injectable()
 export class CvService extends GenericCrudService<Cv> {
