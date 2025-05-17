@@ -4,7 +4,7 @@ import { CvHistoryEvent } from '../constants/cv-history.constants';
 export class FilterCvHistoryDto {
   @IsOptional()
   @IsNumber()
-  cvId?: number;
+  id?: number;
 
   @IsOptional()
   @IsEnum(CvHistoryEvent)
