@@ -9,7 +9,12 @@ import { VersioningType } from '@nestjs/common';
 
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestExpressApplication>(AppModule);
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
+    forceCloseConnections: true,
+  });
+
+  const server = app.getHttpServer();
+
 
   app.enableCors({
     origin: '*', 
@@ -34,7 +39,9 @@ async function bootstrap() {
     type: VersioningType.URI,
     defaultVersion: '1',
   });
-  
+
+
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

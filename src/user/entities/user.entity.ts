@@ -18,10 +18,10 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column({ select: false })
+  @Column()
   password: string;
 
-  @Column({ select: false })
+  @Column()
   salt: string;
 
   @OneToMany(() => Cv, (cv) => cv.user)

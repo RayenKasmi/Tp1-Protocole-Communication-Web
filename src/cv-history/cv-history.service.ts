@@ -21,10 +21,22 @@ export class CvHistoryService {
     return this.historyRepo.save(history);
   }
 
-  async findAll(filter: FilterCvHistoryDto): Promise<CvHistory[]> {
-    return this.historyRepo.find({
-      where: filter,
+  async findAll(filter: FilterCvHistoryDto, userId: number): Promise<any[]> {
+    const histories = await this.historyRepo.find({
+      where: {
+        ...filter,
+        performedBy: { id: userId },
+      },
       order: { performedAt: 'DESC' },
+      relations: ['performedBy'],
+    });
+
+    return histories.map((h) => {
+      const { password, salt, ...safeUser } = h.performedBy;
+      return {
+        ...h,
+        performedBy: safeUser,
+      };
     });
   }
 }
