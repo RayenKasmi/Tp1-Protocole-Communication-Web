@@ -3,138 +3,319 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WebSocket Test Client</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+    <meta name="description" content="A WebSocket client for testing real-time messaging">
+    <meta name="author" content="NestJS WebSocket Client">
+    <meta name="theme-color" content="#4361ee">
+    <title>NestJS Messaging Client</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"><style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --success-color: #4cc9f0;
+            --warning-color: #f72585;
+            --light-color: #f8f9fa;
+            --dark-color: #2d343b;
+            --gray-color: #e9ecef;
+            --sent-msg-color: #4cc9f0;
+            --received-msg-color: #f8f9fa;
+            --box-shadow: 0 4px 6px rgba(28, 27, 27, 0.1);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
         }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+          body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 30px 20px;
+            background-color: #fafafa;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+          header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--primary-color);
+        }
+        
+        h1 {
+            color: var(--primary-color);
+            font-weight: 600;
+            margin: 0;
+        }
+        
+        .theme-toggle {
+            display: flex;
+            align-items: center;
+        }
+        
+        .theme-label {
+            margin-right: 10px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        #themeToggleBtn {
+            background: transparent;
+            border: 1px solid var(--gray-color);
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 18px;
+            padding: 0;
+        }
+        
+        #themeToggleBtn:hover {
+            background: var(--gray-color);
+            transform: rotate(45deg);
+        }
+        
+        h2 {
+            color: var(--secondary-color);
+            margin-bottom: 20px;
+            font-weight: 500;
+        }
+        
         .container {
             display: flex;
-            gap: 20px;
+            gap: 30px;
+            margin-top: 30px;
         }
+        
         .panel {
             flex: 1;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            padding: 15px;
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 25px;
+            box-shadow: var(--box-shadow);
+            transition: var(--transition);
         }
+        
+        .panel:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
         .message-list {
-            height: 300px;
+            height: 350px;
             overflow-y: auto;
-            border: 1px solid #ddd;
-            margin-bottom: 15px;
-            padding: 10px;
-            background: #f9f9f9;
+            padding: 15px;
+            background: var(--dark-color);
+            margin-bottom: 20px;
+            border-radius: var(--border-radius);
+            box-shadow: inset 0 2px 4px rgba(211, 4, 4, 0.05);
         }
+        
         .message {
-            margin-bottom: 10px;
-            padding: 8px;
-            border-radius: 5px;
-        }
-        .sent {
-            background: #dcf8c6;
-            text-align: right;
-            margin-left: 20%;
-        }
-        .received {
-            background: #f1f0f0;
-            margin-right: 20%;
-        }
-        .form-group {
             margin-bottom: 15px;
+            padding: 12px;
+            border-radius: var(--border-radius);
+            position: relative;
+            max-width: 80%;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            word-wrap: break-word;
         }
+        
+        .message div:first-child {
+            font-weight: 600;
+            margin-bottom: 5px;
+            font-size: 0.85rem;
+        }
+        
+        .sent {
+            background: var(--sent-msg-color);
+            color: white;
+            margin-left: auto;
+            border-bottom-right-radius: 0;
+        }
+        
+        .received {
+            background: var(--received-msg-color);
+            border-bottom-left-radius: 0;
+            margin-right: auto;
+            border: 1px solid #eaeaea;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
         label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--secondary-color);
         }
-        input, textarea, button {
+        
+        input, textarea {
             width: 100%;
-            padding: 8px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            box-sizing: border-box;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: var(--border-radius);
+            font-size: 14px;
+            transition: var(--transition);
+            font-family: inherit;
         }
+        
+        input:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(67, 97, 238, 0.2);
+        }
+        
         button {
-            background: #4CAF50;
-            color: white;
+            width: 100%;
+            padding: 12px;
+            border-radius: var(--border-radius);
             border: none;
             cursor: pointer;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            transition: var(--transition);
+            font-size: 16px;
+            font-family: inherit;
+            text-transform: uppercase;
+            color: white;
         }
-        button:hover {
-            background: #45a049;
+        
+        #connectBtn {
+            background-color: var(--primary-color);
         }
+        
+        #connectBtn:hover {
+            background-color: var(--secondary-color);
+        }
+        
+        #sendBtn, #emitBtn {
+            background-color: var(--success-color);
+        }
+        
+        #sendBtn:hover, #emitBtn:hover {
+            filter: brightness(0.9);
+            transform: translateY(-2px);
+        }
+        
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+        
         .status {
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 30px;
+            font-weight: 500;
             margin-top: 15px;
-            padding: 10px;
-            border-radius: 5px;
+            margin-bottom: 15px;
+            text-align: center;
+            transition: var(--transition);
         }
+        
         .connected {
-            background: #d4edda;
-            color: #155724;
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
         }
+        
         .disconnected {
-            background: #f8d7da;
-            color: #721c24;
+            background-color: #fee2e2;
+            color: #b91c1c;
+            border: 1px solid #fecaca;
         }
+        
         .log-area {
-            height: 150px;
-            background: #333;
-            color: #fff;
-            padding: 10px;
-            font-family: monospace;
+            height: 180px;
+            background: var(--dark-color);
+            color: #10b981;
+            padding: 15px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 14px;
+            line-height: 1.4;
             overflow-y: auto;
-            margin-top: 15px;
+            border-radius: var(--border-radius);
+            margin-top: 20px;
+        }
+        
+        .log-area div {
+            margin-bottom: 5px;
+        }
+        
+        /* Responsive styles */
+        @media (max-width: 768px) {
+            .container {
+                flex-direction: column;
+            }
         }
     </style>
 </head>
-<body>
-    <h1>WebSocket Test Client</h1>
+<body>    <header>
+        <h1>WebSocket Messaging Dashboard</h1>
+        <div class="theme-toggle">
+            <span class="theme-label">Theme:</span>
+            <button id="themeToggleBtn">🌙</button>
+        </div>
+    </header>
     
-    <div class="form-group">
-        <label for="token">JWT Token:</label>
-        <input type="text" id="token" placeholder="Paste your JWT token here">
+    <div class="panel connection-panel">
+        <div class="form-group">
+            <label for="token"> Authentication Token:</label>
+            <div class="input-group">
+                <input type="text" id="token" placeholder="Paste your JWT token here">
+                <button id="pasteBtn" class="icon-button" title="Paste from clipboard">📋</button>
+            </div>
+        </div>
+
+        <button id="connectBtn">Connect to WebSocket</button>
+        <div id="status" class="status disconnected">Disconnected</div>
     </div>
 
-    <button id="connectBtn">Connect to WebSocket</button>
-    <div id="status" class="status disconnected">Disconnected</div>
-
-    <div class="container">
-        <div class="panel">
-            <h2>Messages</h2>
+    <div class="container">        <div class="panel">
+            <h2>💬 Chat Messages</h2>
             <div id="messageList" class="message-list"></div>
             
             <div class="form-group">
-                <label for="receiver">Receiver Username:</label>
-                <input type="text" id="receiver" placeholder="Enter receiver's username">
+                <label for="receiver">👤 Recipient:</label>
+                <input type="text" id="receiver" placeholder="Enter recipient's username">
             </div>
             
             <div class="form-group">
-                <label for="messageContent">Message:</label>
-                <textarea id="messageContent" placeholder="Type your message here" rows="3"></textarea>
+                <label for="messageContent">📝 Message:</label>
+                <textarea id="messageContent" placeholder="Type your message here..." rows="3"></textarea>
             </div>
             
             <button id="sendBtn" disabled>Send Message</button>
         </div>
-        
-        <div class="panel">
-            <h2>Event Log</h2>
+          <div class="panel">
+            <h2>Events & Debugging</h2>
             <div id="logArea" class="log-area"></div>
             
             <div class="form-group">
-                <label for="eventName">Custom Event:</label>
-                <input type="text" id="eventName" placeholder="Event name">
+                <label for="eventName"> Custom Event Name:</label>
+                <input type="text" id="eventName" placeholder="Enter event name (e.g. send_message)">
             </div>
             
             <div class="form-group">
-                <label for="eventData">Event Data (JSON):</label>
-                <textarea id="eventData" placeholder="{ }" rows="3"></textarea>
+                <label for="eventData"> Event Data (JSON):</label>
+                <textarea id="eventData" placeholder='{ "key": "value" }' rows="3"></textarea>
             </div>
             
-            <button id="emitBtn" disabled>Emit Event</button>
+            <button id="emitBtn" disabled>Emit Custom Event</button>
         </div>
     </div>
 
@@ -155,23 +336,59 @@
         
         // Socket instance
         let socket;
-        
-        // Log function
-        function log(message, data = null) {
+          // Log function with color coding
+        function log(message, data = null, type = 'info') {
             const now = new Date().toLocaleTimeString();
             const logEntry = document.createElement('div');
             
-            if (data) {
-                logEntry.textContent = `[${now}] ${message}: ${JSON.stringify(data)}`;
-            } else {
-                logEntry.textContent = `[${now}] ${message}`;
+            // Color coding based on message type
+            let prefix = '';
+            switch(type) {
+                case 'error':
+                    prefix = '❌ ';
+                    logEntry.style.color = '#f72585';
+                    break;
+                case 'success':
+                    prefix = '✅ ';
+                    logEntry.style.color = '#4cc9f0';
+                    break;
+                case 'warning':
+                    prefix = '⚠️ ';
+                    logEntry.style.color = '#ffd166';
+                    break;
+                default:
+                    prefix = '';
             }
             
+            if (data) {
+                let dataStr;
+                try {
+                    // Format JSON data for better readability
+                    dataStr = typeof data === 'object' ? 
+                        JSON.stringify(data, null, 2).replace(/\n/g, '').replace(/\s{2,}/g, ' ') : 
+                        data.toString();
+                    
+                    logEntry.innerHTML = `<span style="opacity:0.8">[${now}]</span> ${prefix}${message}: <span style="color:#a5d8ff">${dataStr}</span>`;
+                } catch (e) {
+                    logEntry.textContent = `[${now}] ${prefix}${message}: ${data}`;
+                }
+            } else {
+                logEntry.innerHTML = `<span style="opacity:0.8">[${now}]</span> ${prefix}${message}`;
+            }
+            
+            // Add with subtle animation
+            logEntry.style.opacity = '0';
             logArea.appendChild(logEntry);
+            
+            // Trigger animation
+            setTimeout(() => {
+                logEntry.style.transition = 'opacity 0.3s';
+                logEntry.style.opacity = '1';
+            }, 10);
+            
             logArea.scrollTop = logArea.scrollHeight;
         }
-        
-        // Add message to the UI
+          // Add message to the UI
         function addMessage(content, sender, isSent = false) {
             const messageDiv = document.createElement('div');
             messageDiv.classList.add('message');
@@ -181,12 +398,30 @@
             senderDiv.style.fontWeight = 'bold';
             senderDiv.textContent = sender;
             
+            const timestamp = document.createElement('span');
+            timestamp.style.fontSize = '0.7rem';
+            timestamp.style.opacity = '0.7';
+            timestamp.style.marginLeft = '8px';
+            timestamp.textContent = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            senderDiv.appendChild(timestamp);
+            
             const contentDiv = document.createElement('div');
             contentDiv.textContent = content;
             
             messageDiv.appendChild(senderDiv);
             messageDiv.appendChild(contentDiv);
+            
+            // Add with animation
+            messageDiv.style.opacity = '0';
+            messageDiv.style.transform = 'translateY(10px)';
+            messageDiv.style.transition = 'opacity 0.3s, transform 0.3s';
             messageList.appendChild(messageDiv);
+            
+            // Trigger reflow to start animation
+            void messageDiv.offsetWidth;
+            messageDiv.style.opacity = '1';
+            messageDiv.style.transform = 'translateY(0)';
+            
             messageList.scrollTop = messageList.scrollHeight;
         }
         
@@ -211,14 +446,13 @@
                         token: token
                     }
                 });
-                
-                // Connection events
+                  // Connection events
                 socket.on('connect', () => {
                     statusDiv.textContent = 'Connected';
                     statusDiv.className = 'status connected';
                     sendBtn.disabled = false;
                     emitBtn.disabled = false;
-                    log('Connected to WebSocket server');
+                    log('Successfully connected to WebSocket server', null, 'success');
                 });
                 
                 socket.on('disconnect', () => {
@@ -226,20 +460,20 @@
                     statusDiv.className = 'status disconnected';
                     sendBtn.disabled = true;
                     emitBtn.disabled = true;
-                    log('Disconnected from WebSocket server');
+                    log('Disconnected from WebSocket server', null, 'warning');
                 });
                 
                 socket.on('error', (error) => {
-                    log('Error', error);
+                    log('Error received from server', error, 'error');
                 });
                 
                 // Message events
                 socket.on('message_sent', (data) => {
-                    log('Message sent confirmation', data);
+                    log('Message delivered successfully', data, 'success');
                 });
                 
                 socket.on('receive_message', (message) => {
-                    log('Received message', message);
+                    log('New message received', message);
                     addMessage(message.content, message.sender.username);
                 });
                 
@@ -311,9 +545,40 @@
                 alert('Invalid JSON data: ' + error.message);
             }
         });
+          // Theme toggling functionality
+        const prefersDarkScheme = window.matchMedia('(prefers-color-scheme: dark)');
+        
+        function setTheme(isDark) {
+            const root = document.documentElement;
+            if (isDark) {
+                root.style.setProperty('--light-color', '#1a1a1a');
+                root.style.setProperty('--dark-color', '#f8f9fa');
+                root.style.setProperty('--gray-color', '#333');
+                root.style.setProperty('--received-msg-color', '#333');
+                document.body.style.backgroundColor = '#121212';
+                document.body.style.color = '#f8f9fa';
+            } else {
+                root.style.setProperty('--light-color', '#f8f9fa');
+                root.style.setProperty('--dark-color', '#212529');
+                root.style.setProperty('--gray-color', '#e9ecef');
+                root.style.setProperty('--received-msg-color', '#f8f9fa');
+                document.body.style.backgroundColor = '#fafafa';
+                document.body.style.color = '#212529';
+            }
+        }
+        
+        // Initialize theme based on user preference
+        setTheme(prefersDarkScheme.matches);
+        
+        // Add event listener to window object to detect changes in theme preference
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', e => {
+            setTheme(e.matches);
+        });
         
         // Log initial state
-        log('Client initialized. Please connect to a server.');
+        log('WebSocket Client initialized');
+        log('Please connect to the server using your JWT token');
+        log('------------------------------------------');
     </script>
 </body>
 </html>

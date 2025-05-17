@@ -44,6 +44,16 @@ services:
       - ./src:/app/src
       - ./package.json:/app/package.json
       - ./public:/app/public
+  adminer:
+    image: adminer:latest
+    restart: always
+    ports:
+      - 8081:8080
+    networks:
+      - app-network
+    depends_on:
+      mysql-tp1-web:
+        condition: service_healthy
 
 
 volumes:

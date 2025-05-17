@@ -24,7 +24,6 @@ export class WsAuthHelper {
       // Use the guard to authenticate the connection
       const isAuthenticated = await guard.canActivate(mockExecutionContext);
       
-      // If authentication succeeds, the guard will have attached the user to the client
       return isAuthenticated ? client.data.user : null;
     } catch (error) {
       return null;

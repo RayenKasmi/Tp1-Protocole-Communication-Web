@@ -10,7 +10,7 @@ import {
 import { Socket } from 'socket.io';
 import { MessagesService } from './messages.service';
 import { SendMessageDto } from './dto/send-message.dto';
-import { Injectable, Logger, UseFilters, UseGuards } from '@nestjs/common';
+import { Logger, UseFilters, UseGuards } from '@nestjs/common';
 import { WsJwtGuard } from '../auth/guards/ws-jwt.guard';
 import { WsGetUser } from '../common/decorators/ws-get-user.decorator';
 import { PayloadInterface } from '../auth/strategies/jwt.strategy';
@@ -24,7 +24,8 @@ import { WsAuthHelper } from '../auth/helpers/ws-auth.helper';
 })
 export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect {
   private users = new Map<string, Socket>();
-  private readonly logger = new Logger(MessagesGateway.name);  constructor(
+  private readonly logger = new Logger(MessagesGateway.name);  
+  constructor(
     private messagesService: MessagesService,
     private wsJwtGuard: WsJwtGuard,
   ) {}
@@ -39,7 +40,6 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
         return;
       }
 
-      // Store user info for quick lookup
       this.logger.log(`Client connected: ${user.username}`);
       this.users.set(user.username, client);
     } catch (error) {
@@ -59,7 +59,8 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
         this.users.delete(username);
       }
     }
-  }  @UseFilters(WebsocketExceptionsFilter)
+  }  
+  @UseFilters(WebsocketExceptionsFilter)
   @UseGuards(WsJwtGuard)
   @SubscribeMessage('send_message')
   async onSendMessage(
@@ -68,22 +69,32 @@ export class MessagesGateway implements OnGatewayConnection, OnGatewayDisconnect
     @WsGetUser() user: PayloadInterface
   ) {
     try {
-      // User is now available directly through the decorator
-      const message = await this.messagesService.sendMessage(user.username, dto);
+        if (dto.receiverUsername === user.username) {
+            throw new WsException('Cannot send message to yourself.');
+        }
 
-      // Emit message to sender to confirm delivery
-      client.emit('message_sent', { success: true, messageId: message.id });
+        const message = await this.messagesService.sendMessage(user.username, dto);
 
-      // Emit message to receiver if they're online
-      const receiverSocket = this.users.get(dto.receiverUsername);
-      if (receiverSocket) {
-        receiverSocket.emit('receive_message', message);
-      }
+        if (!message) {
+            throw new WsException('Failed to send message');
+        }
 
-      return { success: true };
+        // Emit message to sender to confirm delivery
+        client.emit('message_sent', { success: true, messageId: message.id });
+
+        const receiverSocket = this.users.get(dto.receiverUsername);
+        if (receiverSocket) {
+            receiverSocket.emit('receive_message', message);
+        }
+        else{
+            this.logger.warn(`Receiver ${dto.receiverUsername} is not connected`);
+            client.emit('user_offline', { receiverUsername: dto.receiverUsername });
+        }
+
+        return { success: true };
     } catch (error) {
-      this.logger.error(`Error sending message: ${error.message}`, error.stack);
-      throw new WsException(error.message || 'Failed to send message');
+        this.logger.error(`Error sending message: ${error.message}`, error.stack);
+        throw new WsException(error.message || 'Failed to send message');
     }
   }
 }
