@@ -10,8 +10,10 @@ import { SkillService } from '../../skill/skill.service';
 import { Skill } from '../../skill/entities/skill.entity';
 import { UserRole } from '../../user/entities/user.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
-import { CvEvent } from '../events/cv-event';
-import { CvAction } from '../entities/cv-history.entity';
+import {
+  CV_HISTORY_EVENT,
+  CvHistoryEvent,
+} from '../../cv-history/constants/cv-history.constants';
 
 @Injectable()
 export class CvService extends GenericCrudService<Cv> {
@@ -19,7 +21,7 @@ export class CvService extends GenericCrudService<Cv> {
     @InjectRepository(Cv) private readonly cvRepository: Repository<Cv>,
     private readonly userService: UserService,
     private readonly skillService: SkillService,
-    private eventEmitter: EventEmitter2,
+    private events: EventEmitter2,
   ) {
     super(cvRepository);
   }
@@ -37,7 +39,7 @@ export class CvService extends GenericCrudService<Cv> {
   //       if(!existingSkill) {
   //         throw new NotFoundException(`Skill with ID ${skillDto.id} not found`);
   //       }
-  //       skills.push(existingSkill);        
+  //       skills.push(existingSkill);
   //     }
   //   }
 
@@ -74,12 +76,21 @@ export class CvService extends GenericCrudService<Cv> {
 
     const savedCv = await this.cvRepository.save(cv);
 
-    this.eventEmitter.emit('cv.action', new CvEvent(CvAction.CREATED, savedCv.id, user.userId));
+    this.events.emit(CV_HISTORY_EVENT, {
+      cv,
+      eventType: CvHistoryEvent.CREATED,
+      performedBy: user.userId,
+      snapshot: cv,
+    });
 
     return savedCv;
   }
 
-  async updateWithUser(id: number, updateCvDto: UpdateCvDto, user: any): Promise<Cv> {
+  async updateWithUser(
+    id: number,
+    updateCvDto: UpdateCvDto,
+    user: any,
+  ): Promise<Cv> {
     try {
       if (!user) {
         throw new Error('User is undefined. Authentication may have failed.');
@@ -90,7 +101,9 @@ export class CvService extends GenericCrudService<Cv> {
       });
 
       if (!cv) {
-        throw new NotFoundException(`Update failed: Cv with ID ${id} not found`);
+        throw new NotFoundException(
+          `Update failed: Cv with ID ${id} not found`,
+        );
       }
 
       if (updateCvDto.skills) {
@@ -98,20 +111,27 @@ export class CvService extends GenericCrudService<Cv> {
         for (const skillDto of updateCvDto.skills) {
           const existingSkill = await this.skillService.findOne(skillDto.id);
           if (!existingSkill) {
-            throw new NotFoundException(`Skill with ID ${skillDto.id} not found`);
+            throw new NotFoundException(
+              `Skill with ID ${skillDto.id} not found`,
+            );
           }
           skills.push(existingSkill);
         }
         cv.skills = skills;
       }
 
+      const before = await this.cvRepository.findOne({ where: { id } });
+
       const updatedCv = await this.cvRepository.save(cv);
 
-      this.eventEmitter.emit('cv.action', new CvEvent(CvAction.UPDATED, updatedCv.id, user.userId));
-
+      this.events.emit(CV_HISTORY_EVENT, {
+        cv,
+        eventType: CvHistoryEvent.UPDATED,
+        performedBy: user.userId,
+        snapshot: { before, after: cv },
+      });
       return updatedCv;
-    }
-    catch (error) {
+    } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
       }
@@ -142,14 +162,20 @@ export class CvService extends GenericCrudService<Cv> {
     }
 
     try {
-      const result = await this.cvRepository.delete(id);
+      const result = await this.cvRepository.softDelete(id);
 
       if (result.affected === 0) {
         throw new NotFoundException(`Cv with ID ${id} not found`);
       }
 
-      this.eventEmitter.emit('cv.action', new CvEvent(CvAction.DELETED, id, user.userId));
+      const before = cv;
 
+      this.events.emit(CV_HISTORY_EVENT, {
+        cv,
+        eventType: CvHistoryEvent.DELETED,
+        performedBy: user.userId,
+        snapshot: before,
+      });
     } catch (error) {
       if (error instanceof NotFoundException) {
         throw error;
@@ -157,7 +183,4 @@ export class CvService extends GenericCrudService<Cv> {
       throw new Error(`Delete failed: ${error.message}`);
     }
   }
-
-
-
 }
