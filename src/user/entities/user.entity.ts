@@ -1,6 +1,7 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany, BeforeInsert } from 'typeorm';
 import { Cv } from '../../cv/entities/cv.entity';
 import * as bcryptjs from 'bcryptjs';
+import { Message } from 'src/messages/entities/message.entity';
 
 export enum UserRole {
   USER = 'user',
@@ -33,6 +34,12 @@ export class User {
     default: UserRole.USER,
   })
   role: UserRole;
+
+  @OneToMany(() => Message, (msg) => msg.sender)
+  sentMessages: Message[];
+
+  @OneToMany(() => Message, (msg) => msg.receiver)
+  receivedMessages: Message[];
 
   @BeforeInsert()
   async hashPassword() {
