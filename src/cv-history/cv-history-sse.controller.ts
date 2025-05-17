@@ -1,6 +1,5 @@
-// cv-history-sse.controller.ts
 import { Controller, Sse, UseGuards } from '@nestjs/common';
-import { Observable, interval, merge } from 'rxjs';
+import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
 import { SseService } from './sse.service';
 import { GetUser } from '../common/decorators/get-user.decorator';
@@ -13,14 +12,8 @@ export class CvHistorySseController {
   @Sse('events')
   @UseGuards(JwtAuthGuard)
   sendEvents(@GetUser() user: any): Observable<{ data: any }> {
-    const data$ = this.sse
+    return this.sse
       .getFilteredStream(user)
-      .pipe(map(event => ({ data: event })));
-
-    const heartbeat$ = interval(10_000).pipe(
-      map(() => ({ data: null })),
-    );
-
-    return merge(data$, heartbeat$);
+      .pipe(map((event) => ({ data: event })));
   }
 }

@@ -14,9 +14,7 @@ export class CvHistoryListener {
 
   @OnEvent(CV_HISTORY_EVENT)
   async handle(event: any) {
-    // log to database
     const logged = await this.historySvc.log(event);
-    // emit over SSE
     const cvEvt: CvEvent = {
       cvId: logged.cv.id,
       eventType: event.eventType,

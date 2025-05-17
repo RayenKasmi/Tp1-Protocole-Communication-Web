@@ -12,7 +12,7 @@ export class CvHistoryController {
   @Get()
   findAll(
     @Query() filter: FilterCvHistoryDto,
-    @GetUser() user: any, // assumes user has a userId property
+    @GetUser() user: any,
   ) {
     return this.historyService.findAll(filter, user.userId);
   }
